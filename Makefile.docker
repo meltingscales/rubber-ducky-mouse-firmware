@@ -1,7 +1,8 @@
 # Makefile.docker: AVR32 build logic for Rubber Ducky Mark I firmware (Docker container only)
 # This is invoked inside the Docker container by the host Makefile.
 
-ASF_PATH ?= /opt/asf-3.45.0
+export ASF_PATH := /opt/asf-3.45.0
+export PATH := /opt/avr32/bin:$(PATH)
 
 CC = avr32-gcc
 OBJCOPY = avr32-objcopy
@@ -18,9 +19,10 @@ MCU = -mpart=uc3b1256
 
 ASF_SRC = \
   $(ASF_PATH)/common/services/clock/uc3b0_b1/sysclk.c \
-  $(ASF_PATH)/common/services/usb/class/hid/mouse/udi_hid_mouse.c \
+  $(ASF_PATH)/common/services/usb/class/hid/device/mouse/udi_hid_mouse.c \
   $(ASF_PATH)/common/services/usb/udc/udc.c \
   $(ASF_PATH)/common/services/usb/udc/udd_uc3.c \
+  $(ASF_PATH)/common/services/usb/class/hid/device/udi_hid.c \
   $(ASF_PATH)/common/services/usb/class/hid/usb_protocol_hid.c \
   $(ASF_PATH)/common/services/usb/udc/udc_desc.c \
   $(ASF_PATH)/common/services/usb/usb_protocol.c

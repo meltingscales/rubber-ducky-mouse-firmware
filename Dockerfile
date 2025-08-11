@@ -5,7 +5,7 @@
 #  - Install the legacy Atmel AVR32 toolchain and ASF 3.45.0 automatically
 #
 FROM debian:stable-slim
-RUN apt-get update && apt-get install -y wget unzip tar make git dfu-programmer build-essential python2 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y wget unzip tar make git dfu-programmer build-essential && rm -rf /var/lib/apt/lists/*
 
 # Install AVR32 toolchain (Atmel's last release, 3.4.2)
 RUN wget -O /tmp/avr32-toolchain.tar.gz "https://ww1.microchip.com/downloads/en/DeviceDoc/avr32-gnu-toolchain-3.4.2.435-linux.any.x86_64.tar.gz" \
