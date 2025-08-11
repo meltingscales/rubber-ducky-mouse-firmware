@@ -1,0 +1,46 @@
+# Makefile.docker: AVR32 build logic for Rubber Ducky Mark I firmware (Docker container only)
+# This is invoked inside the Docker container by the host Makefile.
+
+ASF_PATH ?= /opt/asf-3.45.0
+
+CC = avr32-gcc
+OBJCOPY = avr32-objcopy
+CFLAGS = -Os -pipe -ffunction-sections -fdata-sections -Wall -Wextra -std=gnu11 \
+         -I$(ASF_PATH) -I$(ASF_PATH)/common/services/clock \
+         -I$(ASF_PATH)/common/boards \
+         -I$(ASF_PATH)/common/utils \
+         -I$(ASF_PATH)/common/services/usb \
+         -I$(ASF_PATH)/common/services/usb/class/hid/mouse \
+         -Isrc -Iconf
+LDFLAGS = -Wl,--gc-sections
+
+MCU = -mpart=uc3b1256
+
+ASF_SRC = \
+  $(ASF_PATH)/common/services/clock/uc3b0_b1/sysclk.c \
+  $(ASF_PATH)/common/services/usb/class/hid/mouse/udi_hid_mouse.c \
+  $(ASF_PATH)/common/services/usb/udc/udc.c \
+  $(ASF_PATH)/common/services/usb/udc/udd_uc3.c \
+  $(ASF_PATH)/common/services/usb/class/hid/usb_protocol_hid.c \
+  $(ASF_PATH)/common/services/usb/udc/udc_desc.c \
+  $(ASF_PATH)/common/services/usb/usb_protocol.c
+
+SRC = src/main.c src/ui.c
+
+BUILD_DIR = build
+TARGET = $(BUILD_DIR)/ducky_mouse.elf
+HEX = $(BUILD_DIR)/ducky_mouse.hex
+
+firmware: $(HEX)
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+$(TARGET): $(BUILD_DIR) $(SRC) $(ASF_SRC)
+	$(CC) $(MCU) $(CFLAGS) $(SRC) $(ASF_SRC) -o $@ $(LDFLAGS)
+
+$(HEX): $(TARGET)
+	$(OBJCOPY) -O ihex -R .eeprom $< $@
+
+clean:
+	rm -rf $(BUILD_DIR)
