@@ -1,3 +1,4 @@
+# TODO this is broken until ASF 3.45.0.88 and earlier can be obtained  >:(
 
 # Rubber Ducky Mark I (AT32UC3B1256) — HID Mouse Firmware (random jiggle every 10s)
 
