@@ -13,7 +13,7 @@ RUN wget -O /tmp/avr32-toolchain.tar.gz "https://ww1.microchip.com/downloads/en/
 # Install ASF 3.52.0.113
 RUN wget -O /tmp/asf-standalone-archive-3.52.0.113.zip "https://ww1.microchip.com/downloads/en/DeviceDoc/asf-standalone-archive-3.52.0.113.zip"
 RUN unzip /tmp/asf-standalone-archive-3.52.0.113.zip -d /opt/
-RUN mv /opt/xdk-asf-3.52.0.113 /opt/asf-3.52.0.113
+RUN sh -c 'mv /opt/xdk-asf-3.52.0* /opt/asf-3.52.0.113'
 RUN rm /tmp/asf-standalone-archive-3.52.0.113.zip
 
 ENV PATH="/opt/avr32/bin:${PATH}"
