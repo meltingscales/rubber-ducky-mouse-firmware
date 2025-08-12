@@ -1,10 +1,10 @@
-# TODO this is broken until ASF 3.45.0.88 and earlier can be obtained  >:(
+# Rubber Ducky Mark I (AT32UC3B1256) — HID Keyboard Firmware (random CTRL/SHIFT once per minute)
 
-# Rubber Ducky Mark I (AT32UC3B1256) — HID Mouse Firmware (random jiggle every 10s)
-
-This is a **minimal ASF-based** firmware that enumerates as a USB HID **mouse** and nudges the cursor by a small **random** amount every **10 seconds**. It targets the classic Rubber Ducky **Mark I** (AT32UC3B1256, Atmel DFU `03eb:2ff6`).
+This is a **minimal ASF-based** firmware that enumerates as a USB HID **keyboard** and, once per minute, presses and releases either **CTRL** or **SHIFT** at random. It targets the classic Rubber Ducky **Mark I** (AT32UC3B1256, Atmel DFU `03eb:2ff6`).
 
 > ⚠️ Note: Building is now only supported via Docker. You must provide the legacy Atmel Software Framework (ASF) and avr32-gcc toolchain as described in the Dockerfile.
+
+This container fetches and uses ASF version **3.52.0.113** and the AVR32 GNU Toolchain **3.4.2** automatically.
 
 ## Quick Start (Docker Only)
 
@@ -17,34 +17,33 @@ This is a **minimal ASF-based** firmware that enumerates as a USB HID **mouse** 
    ```sh
    docker run --rm -v $(pwd):/work ducky-avr32 make
    ```
-   The firmware hex will be in `build/ducky_mouse.hex`.
+   The firmware hex will be in `build/ducky_keyboard.hex`.
 4. Flash (DFU mode: hold button, plug in):
    ```sh
    dfu-programmer at32uc3b1256 erase
-   dfu-programmer at32uc3b1256 flash --suppress-bootloader-mem build/ducky_mouse.hex
+   dfu-programmer at32uc3b1256 flash --suppress-bootloader-mem build/ducky_keyboard.hex
    dfu-programmer at32uc3b1256 reset
    ```
 
 For details on how to provide the toolchain and ASF for the Docker build, see the comments in the `Dockerfile`.
 
 ## What it does
-- Enumerates as **HID Mouse** (relative movement).
-- Every **10 seconds**, sends a small random (dx, dy) in range `[-3, +3]` (non-zero), simulating a subtle jiggle.
+- Enumerates as **HID Keyboard**.
+- Every **60 seconds**, presses and releases one modifier: either **Left CTRL** or **Left SHIFT**, chosen at random.
 
 ## File layout
-- `src/main.c` — system init + random jiggle loop using ASF's HID mouse API.
-- `src/ui.c` — minimal UI callbacks required by ASF's UDI HID mouse class.
-- `src/usb_descriptors.h` — HID report descriptor (mouse).
+- `src/main.c` — system init + once-per-minute random CTRL/SHIFT using ASF's HID keyboard API.
+- `src/ui.c` — minimal UI callbacks required by ASF's UDI HID keyboard class.
+- `src/usb_descriptors.h` — not used (keyboard report is provided by ASF `udi_hid_kbd`).
 - `conf/conf_board.h` — board stub.
 - `conf/conf_clock.h` — clock config (12 MHz crystal -> PLL for USB).
-- `conf/conf_usb.h` — select HID mouse class, endpoints.
-- `Makefile` — simple build that pulls in ASF mouse class.
+- `conf/conf_usb.h` — select HID keyboard class.
+- `Makefile` — Docker wrapper that builds inside an image.
 - `Dockerfile` — **stub** showing expected layout if you want to containerize the toolchain.
 
 ## Notes
-- This uses **relative** mouse reports (classic cursor moves). If you want **absolute** reports (tablet-like), adjust the descriptor in `usb_descriptors.h` and ASF config (less common).
-- The random source uses an `xorshift32` seeded from a basic timer tick and USB frame counter — good enough for jitter, not for crypto.
-- If you want **composite keyboard+mouse**, you can switch the UDI in `conf_usb.h` to the composite template and add HID keyboard class (requires extra glue). This scaffold keeps it mouse-only for clarity.
+- The random source uses an `xorshift32` seeded from clocks — fine for this purpose, not for crypto.
+- If you want **composite keyboard+mouse**, switch the UDI in `conf_usb.h` to a composite and add both classes (requires extra glue).
 
 ## Troubleshooting
 - If it enumerates but doesn't move, ensure your OS allows HID mouse input from the device and the endpoint isn't stalled.

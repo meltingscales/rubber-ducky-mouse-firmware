@@ -1,9 +1,6 @@
+# Build from a Debian base
+# Install the legacy Atmel AVR32 toolchain and ASF 3.52.0.113 automatically
 
-# Stub Dockerfile. You must provide the legacy avr32 toolchain and ASF.
-# One approach:
-#  - Build from a Debian base
-#  - Install the legacy Atmel AVR32 toolchain and ASF 3.45.0 automatically
-#
 FROM debian:stable-slim
 RUN apt-get update && apt-get install -y wget unzip tar make git dfu-programmer build-essential && rm -rf /var/lib/apt/lists/*
 
@@ -13,14 +10,14 @@ RUN wget -O /tmp/avr32-toolchain.tar.gz "https://ww1.microchip.com/downloads/en/
     && tar -xzvf /tmp/avr32-toolchain.tar.gz -C /opt/avr32 --strip-components=1 \
     && rm /tmp/avr32-toolchain.tar.gz
 
-# Install ASF 3.45.0
-RUN wget -O /tmp/asf-standalone-archive-3.45.0.88.zip "https://ww1.microchip.com/downloads/en/DeviceDoc/asf-standalone-archive-3.45.0.88.zip" \
-    && unzip /tmp/asf-standalone-archive-3.45.0.88.zip -d /opt/ \
-    && mv /opt/xdk-asf-3.45.0 /opt/asf-3.45.0 \
-    && rm /tmp/asf-standalone-archive-3.45.0.88.zip
+# Install ASF 3.52.0.113
+RUN wget -O /tmp/asf-standalone-archive-3.52.0.113.zip "https://ww1.microchip.com/downloads/en/DeviceDoc/asf-standalone-archive-3.52.0.113.zip"
+RUN unzip /tmp/asf-standalone-archive-3.52.0.113.zip -d /opt/
+RUN mv /opt/xdk-asf-3.52.0.113 /opt/asf-3.52.0.113
+RUN rm /tmp/asf-standalone-archive-3.52.0.113.zip
 
 ENV PATH="/opt/avr32/bin:${PATH}"
-ENV ASF_PATH="/opt/asf-3.45.0"
+ENV ASF_PATH="/opt/asf-3.52.0.113"
 WORKDIR /work
 
 CMD ["make"]

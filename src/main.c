@@ -1,6 +1,7 @@
 
 #include <asf.h>
-#include <udi_hid_mouse.h>
+#include <usb_protocol_hid.h>
+#include <udi_hid_kbd.h>
 
 /* Simple xorshift32 for jitter; NOT cryptographically secure */
 static uint32_t rng_state = 0xC0FFEE01u;
@@ -48,14 +49,17 @@ int main(void)
     }
 
     for (;;) {
-        /* Every ~10 seconds, nudge mouse by small random dx/dy */
-        ms_delay(10000);
-        int8_t dx = small_jitter();
-        int8_t dy = small_jitter();
-        /* ASF mouse move: dx, dy, scroll (0) */
-        udi_hid_mouse_moveX(dx);
-        udi_hid_mouse_moveY(dy);
-        // Alternatively: udi_hid_mouse_move(dx, dy, 0);
+        /* Once per minute, press either CTRL or SHIFT (modifier only) */
+        ms_delay(60000);
+
+        /* Randomly choose between left CTRL and left SHIFT */
+        bool use_ctrl = (xorshift32() & 1u) != 0u;
+        uint8_t mod = use_ctrl ? HID_MODIFIER_LEFT_CTRL : HID_MODIFIER_LEFT_SHIFT;
+
+        /* Press and release the chosen modifier */
+        (void)udi_hid_kbd_modifier_down(mod);
+        ms_delay(30);
+        (void)udi_hid_kbd_modifier_up(mod);
     }
     // not reached
 }
